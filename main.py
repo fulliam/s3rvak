@@ -39,7 +39,8 @@ class ConnectionManager:
     async def broadcast_move(self, user_id: str):
         move_list = {
             "userId": user_id,
-            "coords": self.users[user_id].character.state.position.dict()
+            "coords": self.users[user_id].character.state.position.dict(),
+            "direction": self.users[user_id].character.state.direction
         }
         await self.broadcast(json.dumps({"type": "move", "update": move_list}))
 
@@ -50,6 +51,12 @@ class ConnectionManager:
         }
         await self.broadcast(json.dumps({"type": "action", "update": action_data}))
 
+    async def broadcast_change_character(self, user_id: str):
+        character_data = {
+            "userId": user_id,
+            "character": self.users[user_id].character.info.character
+        }
+        await self.broadcast(json.dumps({"type": "change_character", "update": character_data}))
 
     async def broadcast_messages(self):
         message_list = [message.dict() for message in self.messages]
@@ -76,13 +83,19 @@ async def websocket_endpoint(websocket: WebSocket, userId: str):
                 await manager.broadcast_action(userId)
             elif message_data.get("type") == "move":
                 position_data = message_data.get("position", {})
+                direction_data = message_data.get("direction")
                 user.character.state.position = Position(**position_data)
+                user.character.state.direction = direction_data
                 manager.users[userId] = user
                 await manager.broadcast_move(userId)
             elif message_data.get("type") == "location":
                 user.character.info.location = message_data.get("location")
                 manager.users[userId] = user
                 await manager.broadcast_users()
+            elif message_data.get("type") == "change_character":
+                user.character.info.character = message_data.get("character")
+                manager.users[userId] = user
+                await manager.broadcast_change_character(userId)
             elif message_data.get("type") == "message":
                 content = message_data.get("content", "")
                 message = Message(userId=userId, content=content)

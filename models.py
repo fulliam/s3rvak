@@ -65,6 +65,7 @@ class CharacterInfo(BaseModel):
 
 class CharacterState(BaseModel):
     position: Position
+    direction: str
     action: str
     health: Health
     mana: Mana

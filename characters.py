@@ -14,6 +14,7 @@ characters = {
         ),
         state=CharacterState(
             position=Position(x=0, y=0, z=0),
+            direction='right',
             action='idle',
             health=Health(max=100, current=100, recovery=2),
             mana=Mana(max=80, current=80, recovery=1.5),
@@ -21,7 +22,7 @@ characters = {
             armor=0
         ),
         stats=CharacterStats(
-            speed={'walking': 4, 'running': 8},
+            speed={'walking': 8, 'running': 8},
             params=Params(strength=5, agility=5, intelligence=5, stamina=5, luck=5),
             skills=Skills(
                 fireshtorm=Skill(damage=10, type='magic', range=300, level=0),
@@ -57,6 +58,7 @@ characters = {
         ),
         state=CharacterState(
             position=Position(x=0, y=0, z=0),
+            direction='left',
             action='idle',
             health=Health(max=100, current=100, recovery=2),
             mana=Mana(max=80, current=80, recovery=1.5),
@@ -64,7 +66,7 @@ characters = {
             armor=0
         ),
         stats=CharacterStats(
-            speed={'walking': 4, 'running': 8},
+            speed={'walking': 8, 'running': 8},
             params=Params(strength=5, agility=5, intelligence=5, stamina=5, luck=5),
             skills=Skills(
                 fireshtorm=Skill(damage=10, type='magic', range=300, level=0),
