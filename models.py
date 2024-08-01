@@ -6,7 +6,6 @@ from typing import List, Dict
 class Position(BaseModel):
     x: float
     y: float
-    z: float
 
 class Health(BaseModel):
     max: int

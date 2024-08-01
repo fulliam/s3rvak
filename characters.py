@@ -13,7 +13,7 @@ characters = {
             levelUpExperience=100
         ),
         state=CharacterState(
-            position=Position(x=0, y=0, z=0),
+            position=Position(x=0, y=0),
             direction='right',
             action='idle',
             health=Health(max=100, current=100, recovery=2),
@@ -22,7 +22,7 @@ characters = {
             armor=0
         ),
         stats=CharacterStats(
-            speed={'walking': 8, 'running': 8},
+            speed={'walking': 2, 'running': 4},
             params=Params(strength=5, agility=5, intelligence=5, stamina=5, luck=5),
             skills=Skills(
                 fireshtorm=Skill(damage=10, type='magic', range=300, level=0),
@@ -57,7 +57,7 @@ characters = {
             levelUpExperience=100
         ),
         state=CharacterState(
-            position=Position(x=0, y=0, z=0),
+            position=Position(x=0, y=0),
             direction='left',
             action='idle',
             health=Health(max=100, current=100, recovery=2),
@@ -66,7 +66,7 @@ characters = {
             armor=0
         ),
         stats=CharacterStats(
-            speed={'walking': 8, 'running': 8},
+            speed={'walking': 2, 'running': 4},
             params=Params(strength=5, agility=5, intelligence=5, stamina=5, luck=5),
             skills=Skills(
                 fireshtorm=Skill(damage=10, type='magic', range=300, level=0),
