@@ -1,5 +1,3 @@
-# models.py
-
 from pydantic import BaseModel
 from typing import List, Dict
 
@@ -91,11 +89,3 @@ class Player(BaseModel):
     state: CharacterState
     stats: CharacterStats
     inventory: CharacterInventory
-
-class User(BaseModel):
-    userId: str
-    character: Player
-
-class Message(BaseModel):
-    userId: str
-    content: str
