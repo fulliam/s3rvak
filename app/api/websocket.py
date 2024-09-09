@@ -6,6 +6,7 @@ from app.models.player import Position
 from app.characters import characters
 import json
 from app.core.security import decode_token
+from app.core.status import HTTPStatus, StatusMessages
 
 router = APIRouter()
 
@@ -19,17 +20,15 @@ async def websocket_endpoint(
         payload = decode_token(token)
         token_username = payload.get("username")
         if token_username != userId:
-            print(f"Token username {token_username} does not match userId {userId}")
-            await websocket.close(code=1008, reason="Invalid token")
+            await websocket.close(code=HTTPStatus.POLICY_VIOLATION.value)
             return
-    except Exception as e:
-        print(f"Error during token validation: {str(e)}")
-        await websocket.close(code=1008, reason="Invalid token")
+    except Exception:
+        await websocket.close(code=HTTPStatus.POLICY_VIOLATION.value)
         return
 
     player = user_manager.get_user(userId)
     if player is None:
-        await websocket.close(code=1003, reason="User not found")
+        await websocket.close(code=HTTPStatus.NO_STATUS.value)
         return
 
     user = User(
