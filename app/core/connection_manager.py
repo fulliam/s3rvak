@@ -4,6 +4,7 @@ import json
 from app.models.user import User
 from app.models.message import Message
 from app.models.player import Position
+from app.core.user_manager import user_manager
 
 class ConnectionManager:
     def __init__(self):
@@ -15,6 +16,7 @@ class ConnectionManager:
         await websocket.accept()
         self.active_connections[user.userId] = websocket
         self.users[user.userId] = user
+        user_manager.add_user(user)
         await self.send_personal_message(json.dumps(user.character.dict()), websocket)
         await self.broadcast_users()
 
@@ -23,6 +25,7 @@ class ConnectionManager:
             del self.active_connections[userId]
         if userId in self.users:
             del self.users[userId]
+        # user_manager.remove_user(userId)
 
     async def send_personal_message(self, message: str, websocket: WebSocket):
         await websocket.send_text(message)
@@ -60,3 +63,5 @@ class ConnectionManager:
     async def broadcast_messages(self):
         message_list = [message.dict() for message in self.messages]
         await self.broadcast(json.dumps({"type": "messages", "data": message_list}))
+
+manager = ConnectionManager()
