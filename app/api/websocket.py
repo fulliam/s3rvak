@@ -3,7 +3,6 @@ from app.core.connection_manager import manager
 from app.core.user_manager import user_manager
 from app.models.user import User
 from app.models.player import Position
-from app.characters import characters
 import json
 from app.core.security import decode_token
 from app.core.status import HTTPStatus, StatusMessages
@@ -50,13 +49,20 @@ async def websocket_endpoint(
                 user.character.state.action = message_data.get("action", user.character.state.action)
                 user_manager.add_user(user)
                 await manager.broadcast_action(userId)
-            elif message_type == "move":
+                
+            if message_type == "move":
                 position_data = message_data.get("position", {})
                 direction_data = message_data.get("direction")
-                user.character.state.position = Position(**position_data)
+                
+                # Обновляем позицию в UserManager
+                new_position = Position(**position_data)
+                user_manager.update_user_position(userId, new_position, direction_data)
+
+                # Обновляем локального пользователя
+                user.character.state.position = new_position
                 user.character.state.direction = direction_data
-                user_manager.add_user(user)
                 await manager.broadcast_move(userId)
+                
             elif message_type == "location":
                 user.character.info.location = message_data.get("location")
                 user_manager.add_user(user)

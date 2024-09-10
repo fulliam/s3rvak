@@ -1,5 +1,6 @@
 from typing import Dict, List
 from fastapi import WebSocket
+from fastapi.websockets import WebSocketState
 import json
 from app.models.user import User
 from app.models.message import Message
@@ -32,17 +33,29 @@ class ConnectionManager:
 
     async def broadcast(self, message: str):
         for connection in self.active_connections.values():
-            await connection.send_text(message)
+            if connection.client_state != WebSocketState.DISCONNECTED:
+                try:
+                    await connection.send_text(message)
+                except RuntimeError as e:
+                    if "websocket.close" in str(e):
+                        continue
+                    else:
+                        raise
 
     async def broadcast_users(self):
         user_list = [user.dict() for user in self.users.values()]
         await self.broadcast(json.dumps({"type": "users", "data": user_list}))
 
     async def broadcast_move(self, user_id: str):
+        # Обновление позиции пользователя
+        new_position = self.users[user_id].character.state.position
+        new_direction = self.users[user_id].character.state.direction
+        user_manager.update_user_position(user_id, new_position, new_direction)
+        
         move_list = {
             "userId": user_id,
-            "coords": self.users[user_id].character.state.position.dict(),
-            "direction": self.users[user_id].character.state.direction
+            "coords": new_position.dict(),
+            "direction": new_direction
         }
         await self.broadcast(json.dumps({"type": "move", "update": move_list}))
 
