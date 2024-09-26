@@ -1,6 +1,7 @@
 # characters.py
 
 from app.models.player import Player, CharacterInfo, CharacterState, CharacterStats, CharacterInventory, Health, Mana, Stamina, Position, Params, Skill, Skills, Money, Crit, Attack
+import random
 
 def create_default_player() -> Player:
     default_position = Position(x=0, y=0)
@@ -20,6 +21,84 @@ def create_default_player() -> Player:
     default_info = CharacterInfo(
         category="ally",
         character="wizard",
+        location="12345",
+        level=1,
+        experience=0,
+        levelUpExperience=100
+    )
+    default_state = CharacterState(
+        position=default_position,
+        direction="left",
+        action="idle",
+        health=default_health,
+        mana=default_mana,
+        stamina=default_stamina,
+        armor=0
+    )
+    default_stats = CharacterStats(
+        speed={"walking": 5, "running": 10},
+        params=default_params,
+        skills=default_skills,
+        skillPoints=0,
+        statPoints=0,
+        damage={"physic": 10, "magic": 5},
+        attacks={
+            "attack": default_attack,
+            "attack2": Attack(damage=15, type="physic", range=100, level=1),
+            "attack3": Attack(damage=20, type="physic", range=100, level=1)
+        },
+        attackSpeed=1,
+        crit=default_crit
+    )
+    default_inventory = CharacterInventory(
+        money=default_money,
+        inventory=[]
+    )
+
+    return Player(
+        info=default_info,
+        state=default_state,
+        stats=default_stats,
+        inventory=default_inventory
+    )
+
+def create_random_enemy() -> Player:
+    groups = {
+        "orcs": ["warrior", "berserk", "shaman"],
+        "slimes": ["red", "green", "blue"]
+    }
+
+    no_group_characters = ["warrior", "paladin", "warmor", "spirit"]
+
+    group_chance = 0.5
+
+    random_group = None
+    random_character = None
+
+    if random.random() < group_chance:
+        random_group = random.choice(list(groups.keys()))
+        random_character = random.choice(groups[random_group])
+    else:
+        random_character = random.choice(no_group_characters)
+
+    default_position = Position(x=0, y=0)
+    default_health = Health(max=10, current=10, recovery=1.0)
+    default_mana = Mana(max=0, current=0, recovery=0)
+    default_stamina = Stamina(max=100, current=100, recovery=1.0)
+    default_crit = Crit(chance=0.1, factor=2.0)
+    default_attack = Attack(damage=10, type="physic", range=100, level=1)
+    default_money = Money(coins={"silver": 0, "gold": 0, "red": 0},
+                          gems={"blue": 0, "yellow": 0, "green": 0, "grey": 0, "red": 0})
+    default_params = Params(strength=1, agility=1, intelligence=1, stamina=1, luck=1)
+    default_skills = Skills(
+        fireshtorm=Skill(damage=5, type="magic", range=500, level=1),
+        lighting=Skill(damage=5, type="magic", range=500, level=1),
+        poisonshtorm=Skill(damage=5, type="magic", range=500, level=1)
+    )
+    default_info = CharacterInfo(
+        category="enemy",
+        group=random_group,
+        character=random_character,
         location="12345",
         level=1,
         experience=0,

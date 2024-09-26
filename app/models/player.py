@@ -1,5 +1,6 @@
+from click import group
 from pydantic import BaseModel
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 class Position(BaseModel):
     x: float
@@ -54,6 +55,7 @@ class Skills(BaseModel):
 
 class CharacterInfo(BaseModel):
     category: str
+    group: Optional[str] = None
     character: str
     location: str
     level: int

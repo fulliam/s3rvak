@@ -2,10 +2,12 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect, HTTPException, De
 from app.core.connection_manager import manager
 from app.core.user_manager import user_manager
 from app.models.user import User
+from app.models.message import Message
 from app.models.player import Position
 import json
 from app.core.security import decode_token
 from app.core.status import HTTPStatus, StatusMessages
+from app.characters import create_random_enemy
 
 router = APIRouter()
 
@@ -38,6 +40,9 @@ async def websocket_endpoint(
     )
 
     await manager.connect(websocket, user)
+
+    enemies = [create_random_enemy() for _ in range(20)]  # Создание 5 случайных врагов
+    await websocket.send_text(json.dumps({"type": "initial_enemies", "enemies": [enemy.dict() for enemy in enemies]}))
     
     try:
         while True:
@@ -50,34 +55,41 @@ async def websocket_endpoint(
                 user_manager.add_user(user)
                 await manager.broadcast_action(userId)
                 
+            if message_type == "attack":
+                attack_data = message_data.get("attack", {})
+
+                await manager.broadcast_attack(userId, attack_data)
+
             if message_type == "move":
                 position_data = message_data.get("position", {})
                 direction_data = message_data.get("direction")
                 
-                # Обновляем позицию в UserManager
                 new_position = Position(**position_data)
                 user_manager.update_user_position(userId, new_position, direction_data)
 
-                # Обновляем локального пользователя
                 user.character.state.position = new_position
                 user.character.state.direction = direction_data
                 await manager.broadcast_move(userId)
                 
-            elif message_type == "location":
+            if message_type == "location":
                 user.character.info.location = message_data.get("location")
                 user_manager.add_user(user)
                 await manager.broadcast_users()
-            elif message_type == "change_character":
+
+            if message_type == "change_character":
                 user.character.info.character = message_data.get("character")
                 user_manager.add_user(user)
                 await manager.broadcast_change_character(userId)
-            elif message_type == "message":
+
+            if message_type == "message":
                 content = message_data.get("content", "")
                 message = Message(userId=userId, content=content)
                 manager.messages.append(message)
                 await manager.broadcast_messages()
+
             else:
                 await websocket.send_text(json.dumps({"error": "Invalid message type"}))
+
     except WebSocketDisconnect:
         manager.disconnect(userId)
         await manager.broadcast_users()
